@@ -1,4 +1,4 @@
-// server.js
+// server.js - Final Stable Version
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
@@ -6,36 +6,32 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080; // Railway සාමාන්‍යයෙන් 8080 භාවිතා කරයි
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Email යැවීම සඳහා Nodemailer සැකසීම (වැඩි දියුණු කළ ක්‍රමය)
+// Email යැවීම සඳහා Nodemailer සැකසීම
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
-    secure: true, // Port 465 සඳහා true භාවිතා කරන්න
+    secure: true, 
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
     tls: {
-        // ජාල සම්බන්ධතා ගැටළු මඟහරවා ගැනීමට මෙය උපකාරී වේ
-        rejectUnauthorized: false
+        rejectUnauthorized: false // ජාල බාධාවන් මඟහරවා ගැනීමට
     }
 });
 
-// Front-end එකෙන් දත්ත ලබා ගන්නා API Route එක (POST Request)
-app.post('/api/contact', (req, res) => {
+app.post('/api/contact', async (req, res) => {
     const { name, email, phone, subject, message } = req.body;
 
-    // Email එකේ ආකෘතිය සැකසීම
     const mailOptions = {
         from: process.env.EMAIL_USER,
-        to: process.env.RECEIVER_EMAIL, // පණිවිඩය ලැබිය යුතු ඔබේ Email ලිපිනය
+        to: process.env.RECEIVER_EMAIL,
         subject: `New Contact Form Submission: ${subject}`,
         html: `
             <h3>New Message from Accounting Advisor Website</h3>
@@ -48,19 +44,16 @@ app.post('/api/contact', (req, res) => {
         `
     };
 
-    // Email එක යැවීම
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error('Error sending email:', error);
-            res.status(500).json({ success: false, message: 'Failed to send message.' });
-        } else {
-            console.log('Email sent:', info.response);
-            res.status(200).json({ success: true, message: 'Message sent successfully!' });
-        }
-    });
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully!');
+        res.status(200).json({ success: true, message: 'Message sent successfully!' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
-// සර්වර් එක ආරම්භ කිරීම
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
