@@ -15,7 +15,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Email යැවීම සඳහා Nodemailer සැකසීම
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // හෝ ඔබ භාවිතා කරන වෙනත් සේවාවක්
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
