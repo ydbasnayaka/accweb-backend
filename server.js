@@ -13,14 +13,18 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Email යැවීම සඳහා Nodemailer සැකසීම
+// Email යැවීම සඳහා Nodemailer සැකසීම (වැඩි දියුණු කළ ක්‍රමය)
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
-    secure: true,
+    secure: true, // Port 465 සඳහා true භාවිතා කරන්න
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        // ජාල සම්බන්ධතා ගැටළු මඟහරවා ගැනීමට මෙය උපකාරී වේ
+        rejectUnauthorized: false
     }
 });
 
